@@ -9,6 +9,8 @@ using System.Text;
 using System.Windows.Forms;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
+using WITS.to.XAF.WITSRej;
+using DevExpress.Xpo.Metadata;
 
 namespace WitsDatabaseMigrator
 {
@@ -23,11 +25,25 @@ namespace WitsDatabaseMigrator
         {
             base.OnLoad(e);
 
-            //var connectionString = MSSqlConnectionProvider.GetConnectionString("AZ18W1350:1433", "sa", "Server12346789", "WITSMigration");
-            //var dataLayer = XpoDefault.GetDataLayer(connectionString, AutoCreateOption.DatabaseAndSchema);
-            //var uow = new UnitOfWork(dataLayer);
+            var connectionString = MSSqlConnectionProvider.GetConnectionString("AZ18W1350:1433", "sa", "Server12346789", "WITSTest2");
+            var dataLayer = XpoDefault.GetDataLayer(connectionString, AutoCreateOption.DatabaseAndSchema);
+            var uow = new UnitOfWork(dataLayer);
 
-            //var customerCollection = new XPCollection<PropertyMapping>(uow);
+            //get class info
+            XPClassInfo commodityClassInfo = uow.GetClassInfo(typeof(Commodity));
+            var col = new XPCollection<PropertyMapping>(uow);
+
+            foreach (XPMemberInfo i in commodityClassInfo.OwnMembers)
+            {
+                col.Add(new PropertyMapping() {
+                    NewColumn = i.Name,
+                    OldColumn = $"Old {i.Name}",
+                    OldType = i.MemberType.Name,
+                    NewType = i.MemberType.Name
+
+                });                
+            }
+
 
             //var propertyMap = new PropertyMapping() {
             //    LegacyName = "Certificate",
@@ -40,8 +56,8 @@ namespace WitsDatabaseMigrator
 
             //uow.CommitChanges();
 
-            //gridControl1.DataSource = customerCollection;
-            //gridControl1.Refresh();
+            gridControl1.DataSource = col;
+            gridControl1.Refresh();
         }
         void OnOuterFormCreating(object sender, OuterFormCreatingEventArgs e)
         {
@@ -51,15 +67,10 @@ namespace WitsDatabaseMigrator
             OpenFormCount++;
         }
         static int OpenFormCount = 1;
-
-        private void tabFormControl1_Click(object sender, EventArgs e)
-        {
-
-        }
-
+                
         private void simpleButton1_Click(object sender, EventArgs e)
         {
-            tabFormControl1.Pages.Add;
+
         }
 
         private void barButtonItem1_ItemClick(object sender, ItemClickEventArgs e)
@@ -68,6 +79,11 @@ namespace WitsDatabaseMigrator
         }
 
         private void barButtonItem4_ItemClick(object sender, ItemClickEventArgs e)
+        {
+
+        }
+
+        private void gridView1_ShowingEditor(object sender, CancelEventArgs e)
         {
 
         }
