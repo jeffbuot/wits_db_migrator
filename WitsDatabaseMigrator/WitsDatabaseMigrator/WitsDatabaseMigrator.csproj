@@ -65,6 +65,21 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyMapping.cs" />
+    <Compile Include="WITS XAF Models\Certificate.cs" />
+    <Compile Include="WITS XAF Models\Certificate.Designer.cs" />
+    <Compile Include="WITS XAF Models\Commodity.cs" />
+    <Compile Include="WITS XAF Models\Commodity.Designer.cs" />
+    <Compile Include="WITS XAF Models\ConnectionHelper.cs" />
+    <Compile Include="WITS XAF Models\Customer.cs" />
+    <Compile Include="WITS XAF Models\Customer.Designer.cs" />
+    <Compile Include="WITS XAF Models\GrowerYTD.cs" />
+    <Compile Include="WITS XAF Models\GrowerYTD.Designer.cs" />
+    <Compile Include="WITS XAF Models\LotNumber.cs" />
+    <Compile Include="WITS XAF Models\LotNumber.Designer.cs" />
+    <Compile Include="WITS XAF Models\SplitDetail.cs" />
+    <Compile Include="WITS XAF Models\SplitDetail.Designer.cs" />
+    <Compile Include="WITS XAF Models\SplitSetup.cs" />
+    <Compile Include="WITS XAF Models\SplitSetup.Designer.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

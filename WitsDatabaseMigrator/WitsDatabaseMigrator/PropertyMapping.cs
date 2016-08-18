@@ -23,35 +23,75 @@ namespace WitsDatabaseMigrator
             base.AfterConstruction();
             // Place here your initialization code.
         }
-
         // Fields...
-        private string _NewPropertyName;
-        private string _LegacyName;
+        private string _OldColumn;
+         private string _NewColumn;
+        private string _TableName;
+        private string _OldType;
+        private string _NewType;
 
         [Size(SizeAttribute.DefaultStringMappingFieldSize)]
-        public string LegacyName
+        public string NewType
         {
             get
             {
-                return _LegacyName;
+                return _NewType;
             }
             set
             {
-                SetPropertyValue("LegacyName", ref _LegacyName, value);
+                SetPropertyValue("NewType", ref _NewType, value);
             }
         }
 
-
         [Size(SizeAttribute.DefaultStringMappingFieldSize)]
-        public string NewPropertyName
+        public string OldType
         {
             get
             {
-                return _NewPropertyName;
+                return _OldType;
             }
             set
             {
-                SetPropertyValue("NewPropertyName", ref _NewPropertyName, value);
+                SetPropertyValue("OldType", ref _OldType, value);
+            }
+        }
+
+        [Size(SizeAttribute.DefaultStringMappingFieldSize)]
+        public string TableName
+        {
+            get
+            {
+                return _TableName;
+            }
+            set
+            {
+                SetPropertyValue("TableName", ref _TableName, value);
+            }
+        }
+
+        [Size(SizeAttribute.DefaultStringMappingFieldSize)]
+        public string NewColumn
+        {
+            get
+            {
+                return _NewColumn;
+            }
+            set
+            {
+                SetPropertyValue("NewColumn", ref _NewColumn, value);
+            }
+        }
+
+        [Size(SizeAttribute.DefaultStringMappingFieldSize)]
+        public string OldColumn
+        {
+            get
+            {
+                return _OldColumn;
+            }
+            set
+            {
+                SetPropertyValue("OldColumn", ref _OldColumn, value);
             }
         }
     }
