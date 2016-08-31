@@ -15,7 +15,7 @@ namespace WITS.to.XAF.WITSRej
 {
     public static class ConnectionHelper
     {
-        public const string ConnectionString = @"XpoProvider=MSSqlServer;data source=AZ18W1350,1433\AERO2K8R2Q;user id=sa;password=Server12346789;initial catalog=WITSRej;Persist Security Info=true";
+        public const string ConnectionString = @"XpoProvider=MSSqlServer;data source=AZ18W1350,1433\AERO2K8R2Q;user id=sa;password=Server12346789;initial catalog=WITSRej2;Persist Security Info=true";
         public static void Connect(DevExpress.Xpo.DB.AutoCreateOption autoCreateOption)
         {
             XpoDefault.DataLayer = XpoDefault.GetDataLayer(ConnectionString, autoCreateOption);

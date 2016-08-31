@@ -11,53 +11,115 @@ using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using WITS.to.XAF.WITSRej;
 using DevExpress.Xpo.Metadata;
+using DevExpress.XtraGrid;
+using DevExpress.XtraEditors.Repository;
+using DevExpress.Data.Filtering;
+using WitsDatabaseMigrator.Helpers;
+using System.Data.OleDb;
+using DevExpress.XtraEditors;
 
 namespace WitsDatabaseMigrator
 {
     public partial class Form1 : TabForm
     {
+        private UnitOfWork unitOfWork;
+        IDataLayer dataLayer;
+        private readonly DirectoryPathSettings dps;
         public Form1()
         {
             InitializeComponent();
+            // --- Setup Connection
+            dataLayer = ConnectionHelper.GetDataLayer(AutoCreateOption.DatabaseAndSchema);
+
+            //Load Configurations
+            dps = XMLHelper.LoadClassXML<DirectoryPathSettings>(DirectoryPathSettings.XMLPathDefault) as DirectoryPathSettings;
+            if (dps == null) {
+                dps = new DirectoryPathSettings();
+                XMLHelper.SaveClassXML<DirectoryPathSettings>(dps,dps.);
+            }
+            //Load
+
+            LoadAllMappingData();
         }
 
+        private void LoadAllMappingData()
+        {
+            unitOfWork = new UnitOfWork(dataLayer);
+
+            populateData(unitOfWork.GetClassInfo(typeof(Commodity)), gridControlCommodity, dropSourceRepoCommodity);
+            populateData(unitOfWork.GetClassInfo(typeof(Certificate)), gridControlCertificate, dropSourceRepoCertificate);
+            populateData(unitOfWork.GetClassInfo(typeof(Customer)), gridControlCustomer, dropSourceRepoCustomer);
+            populateData(unitOfWork.GetClassInfo(typeof(LotNumber)), gridControlLotNum, dropSourceRepoLotNumber);
+            populateData(unitOfWork.GetClassInfo(typeof(GrowerYTD)), gridControlGrowerYTD, dropSourceRepoGowerYTD);
+            populateData(unitOfWork.GetClassInfo(typeof(SplitSetup)), gridControlSplitSetup, dropSourceRepoSplitSetup);
+            populateData(unitOfWork.GetClassInfo(typeof(SplitDetail)), gridControlSplitDetails, dropSourceRepoSplitDetails);
+
+        }
+
+        private void populateData(XPClassInfo classInfo, GridControl gridControl, RepositoryItemComboBox cb)
+        {
+            var mappedObject = unitOfWork.FindObject<MappedColumn>(CriteriaOperator.Parse("TableName = ?", classInfo.TableName));
+            if (mappedObject == null)
+            {
+                //setup the table to the database
+                //now MappedColumn that doesn't appear in the database has nowhere to run
+                foreach (XPMemberInfo i in classInfo.OwnMembers)
+                {
+                    mappedObject = new MappedColumn(unitOfWork)
+                    {
+                        TableName = classInfo.TableName,
+                        NewColumn = i.Name,
+                        NewType = i.MemberType.Name,
+                        OldColumn = "(None)"
+                    };
+                    mappedObject.Save();
+                }
+            }
+            unitOfWork.CommitChanges();
+            gridControl.DataSource = new XPCollection<MappedColumn>(unitOfWork, CriteriaOperator.Parse("TableName=?", classInfo.TableName));
+            gridControl.Refresh();
+            populateDropdown(classInfo.TableName, cb);
+        }
+
+        private void populateDropdown(string TableName, RepositoryItemComboBox cb)
+        {
+            DataTable dt = new DataTable();
+            string queryString = DBFConnectionHelper.DataTables[TableName];
+            OleDbCommand cmd = new OleDbCommand(queryString);
+            cmd.Connection = new OleDbConnection($"Provider=VfpOleDB;Data Source= {databaseDirectory};Collating Sequence=general");
+            cmd.Connection.Open();
+            OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
+            try
+            {
+                adapter.Fill(dt);
+            }
+            catch (OleDbException ex)
+            {
+                XtraMessageBox.Show(this, $"Unable to open database directory \"{databaseDirectory}\".", "Databae error.");
+            }
+            if (adapter != null)
+                adapter.Dispose();
+            if (cmd != null)
+                cmd.Dispose();
+            Console.WriteLine("Table test");
+            foreach (DataColumn i in dt.Columns)
+            {
+                string s = i.ColumnName;
+                cb.Items.Add(s);
+                //Console.WriteLine(s);
+            }
+        }
+        private void RestoreMappingettings()
+        {
+
+        }
+        private void SaveAllMapping()
+        {
+
+        }
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-
-            var connectionString = MSSqlConnectionProvider.GetConnectionString("AZ18W1350:1433", "sa", "Server12346789", "WITSTest2");
-            var dataLayer = XpoDefault.GetDataLayer(connectionString, AutoCreateOption.DatabaseAndSchema);
-            var uow = new UnitOfWork(dataLayer);
-
-            //get class info
-            XPClassInfo commodityClassInfo = uow.GetClassInfo(typeof(Commodity));
-            var col = new XPCollection<PropertyMapping>(uow);
-
-            foreach (XPMemberInfo i in commodityClassInfo.OwnMembers)
-            {
-                col.Add(new PropertyMapping() {
-                    NewColumn = i.Name,
-                    OldColumn = $"Old {i.Name}",
-                    OldType = i.MemberType.Name,
-                    NewType = i.MemberType.Name
-
-                });                
-            }
-
-
-            //var propertyMap = new PropertyMapping() {
-            //    LegacyName = "Certificate",
-            //    NewPropertyName = "Certificate"
-            //};
-
-            //propertyMap.Save();
-            //customerCollection.Add(propertyMap);
-
-
-            //uow.CommitChanges();
-
-            gridControl1.DataSource = col;
-            gridControl1.Refresh();
         }
         void OnOuterFormCreating(object sender, OuterFormCreatingEventArgs e)
         {
@@ -67,23 +129,19 @@ namespace WitsDatabaseMigrator
             OpenFormCount++;
         }
         static int OpenFormCount = 1;
-                
-        private void simpleButton1_Click(object sender, EventArgs e)
-        {
 
+        private void btnBrowseDBF_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fb = new FolderBrowserDialog();
+            fb.Description = "Select the database directory:";
+            if (fb.ShowDialog(this) == DialogResult.OK)
+            {
+                databaseDirectory = fb.SelectedPath;
+                System.Configuration.ConfigurationSettings.AppSettings["db_dir"] = databaseDirectory;
+            }
         }
 
-        private void barButtonItem1_ItemClick(object sender, ItemClickEventArgs e)
-        {
-
-        }
-
-        private void barButtonItem4_ItemClick(object sender, ItemClickEventArgs e)
-        {
-
-        }
-
-        private void gridView1_ShowingEditor(object sender, CancelEventArgs e)
+        private void btnBrowseXML_Click(object sender, EventArgs e)
         {
 
         }
