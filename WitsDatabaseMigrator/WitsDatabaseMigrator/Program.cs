@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using DevExpress.UserSkins;
 using DevExpress.Skins;
+using DevExpress.LookAndFeel;
 
 namespace WitsDatabaseMigrator
 {
@@ -20,8 +21,8 @@ namespace WitsDatabaseMigrator
 
             BonusSkins.Register();
             SkinManager.EnableFormSkins();
-            new Form1().Show();
-            Application.Run();
+            UserLookAndFeel.Default.SetSkinStyle("DevExpress Style");
+            Application.Run(new Form1());
         }
     }
 }
